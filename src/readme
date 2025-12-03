@@ -1,0 +1,153 @@
+This coding assignment evaluates multiple core skills of a Data Engineer: data ingestion, data modeling, data cleaning, data transformation, API development, and good software engineering practices.
+The goal is to design a small but complete data engineering pipeline using the weather dataset provided.
+
+1. Data Understanding
+
+You are given weather data files (one file per station) containing:
+
+Date
+
+Maximum temperature (in tenths of °C)
+
+Minimum temperature (in tenths of °C)
+
+Precipitation (in tenths of mm)
+
+Missing values represented by -9999
+
+This raw data needs to be ingested, structured, cleaned, analyzed, and exposed through an API.
+
+2. Data Modeling
+
+We design two database tables:
+
+Raw Weather Observations Table
+Stores the ingested data exactly as provided, with missing values converted to NULL.
+
+Key design decisions:
+
+station_id and date together form a unique constraint
+→ prevents duplicate records if ingestion runs multiple times.
+
+Raw values kept in original “tenths” units for accuracy.
+
+Yearly Weather Statistics Table
+Stores aggregated metrics for each station and year:
+
+Average maximum temperature (°C)
+
+Average minimum temperature (°C)
+
+Total precipitation (cm)
+
+NULL if metrics cannot be computed due to missing data
+
+This separation of raw data and aggregate data follows good database modeling practices.
+
+3. Data Ingestion (ETL – Extract, Transform, Load)
+
+A script is written to:
+
+Read all weather files from wx_data/
+
+Extract station ID from filename
+
+Parse each line
+
+Convert:
+
+Dates into proper date objects
+
+-9999 into NULL
+
+Load data into the database
+
+Skip duplicates using unique constraint + error handling
+
+Log:
+
+Start time
+
+End time
+
+Number of records ingested
+
+This shows:
+
+Ability to build idempotent ingestion pipelines
+
+Proper logging and error handling
+
+4. Data Analysis (Aggregation)
+
+We compute per-station per-year statistics:
+
+Average max temperature
+
+Average min temperature
+
+Total precipitation
+
+While computing:
+
+Missing values (NULL) are ignored automatically by SQL aggregate functions
+
+Units are converted:
+
+Tenths of °C → °C
+
+Tenths of mm → cm
+
+The results are stored back into the database in the statistics table.
+
+This demonstrates:
+
+Ability to build a transformation / aggregation layer
+
+Good understanding of SQL and data quality handling
+
+5. REST API Development
+
+A REST API is implemented using FastAPI, providing:
+
+Endpoints:
+
+GET /api/weather
+Returns raw ingested weather records
+
+Supports filtering by station ID and date
+
+Supports pagination
+
+Automatically converts raw values into °C and cm
+
+GET /api/weather/stats
+Returns yearly aggregated statistics
+
+Supports filtering by station ID and year
+
+Supports pagination
+
+Documentation:
+
+Automatic Swagger / OpenAPI documentation available at /docs
+
+This shows:
+
+Ability to design clean, well-structured REST services
+
+Ability to expose cleaned and processed data to external systems
+
+6. Optional: Cloud Deployment Design
+
+A high-level plan is provided describing how this solution could be deployed in AWS using:
+
+ECS Fargate or Lambda for API & jobs
+
+RDS PostgreSQL for database
+
+EventBridge for scheduling ingestion
+
+S3 for raw file storage
+
+This demonstrates understanding of modern cloud architecture.
